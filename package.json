@@ -1,0 +1,21 @@
+{
+  "name": "icd-10-cm-core",
+  "version": "0.1.0",
+  "description": "ICD-10-cm filter core",
+  "main": "index.js",
+  "scripts": {
+    "start": "./node_modules/.bin/babel-node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Casper Lai",
+  "license": "MIT",
+  "dependencies": {
+    "icd-10-cm-parser": "git+ssh://git@git.i-uix.com:casperlai/icd-10-cm-parser.git",
+    "immutable": "^3.7.5",
+    "lodash": "^3.10.1"
+  },
+  "devDependencies": {
+    "babel": "^5.8.23",
+    "babel-core": "^5.8.25"
+  }
+}
