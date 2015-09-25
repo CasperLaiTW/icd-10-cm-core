@@ -2,7 +2,7 @@ import icdJson from 'icd-10-cm-parser';
 import { Map } from 'immutable';
 import _ from 'lodash';
 
-export default class Core
+class Core
 {
 
   /**
@@ -177,6 +177,10 @@ export default class Core
     this.conditions = _.assign({}, this.defaultCondition);
   }
 
+  /**
+   * Get menu state
+   * @return Map
+   */
   getConditionState() {
     const keys = this.menus.keySeq().toArray();
     let menus = this.menus;
@@ -194,5 +198,7 @@ export default class Core
     });
     return menus;
   }
-
 }
+
+const core = new Core();
+export default core;
