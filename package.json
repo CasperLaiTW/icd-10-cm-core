@@ -10,7 +10,7 @@
   "author": "Casper Lai",
   "license": "MIT",
   "dependencies": {
-    "icd-10-cm-parser": "git+ssh://git@git.i-uix.com:casperlai/icd-10-cm-parser.git",
+    "icd-10-cm-parser": "^0.1.0",
     "immutable": "^3.7.5",
     "lodash": "^3.10.1"
   },
