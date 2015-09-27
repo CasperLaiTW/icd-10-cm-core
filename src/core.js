@@ -91,7 +91,7 @@ class Core
     let icds = this.defaultICD.get('data');
     _.each(this.conditions, (condition) => {
       if (condition !== undefined) {
-        icds = icds.filter(icd => parseInt(icd[key]) === value);
+        icds = icds.filter(icd => parseInt(icd[key]) === parseInt(value));
       }
     });
     return icds;
