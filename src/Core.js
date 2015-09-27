@@ -108,6 +108,7 @@ class Core
   _concatAll(data) {
     return {
       code: data.code,
+      content: data.content,
       pedestrian: this.defaultICD.get('pedestrian').get(data.pedestrian).name,
       pedestrianDetail: this.defaultICD.get('pedestrianDetail').get(data.pedestrianDetail).name,
       perpetrator: this.defaultICD.get('perpetrator').get(data.perpetrator).name,
