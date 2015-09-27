@@ -86,18 +86,9 @@ class Core
    * @param  integer value
    * @return Map
    */
-    _filter(key, value) {
+  _filter(key, value) {
     this.conditions[key] = value;
-    let icds = this.defaultICD.get('data');
-    let i = 0;
-    _.each(this.conditions, (condition, keyCondition) => {
-      if (condition !== undefined) {
-        icds = icds.filter((icd) => {
-          return parseInt(icd[keyCondition]) === parseInt(condition)
-        });
-      }
-    });
-    return icds;
+    return this.ICD.filter(icd => parseInt(icd[key]) === parseInt(value));
   }
 
   /**
@@ -177,6 +168,22 @@ class Core
   reset() {
     this._clone();
     this.conditions = _.assign({}, this.defaultCondition);
+  }
+
+  /**
+   * Undo filter condition
+   * @param  string key
+   * @return void
+   */
+  undo(key) {
+    this._clone();
+    this.conditions[key] = undefined;
+    _.each(this.conditions, (value, key) => {
+      if (value === undefined) {
+        return;
+      }
+      this.ICD = this._filter(key, value);
+    });
   }
 
   /**
