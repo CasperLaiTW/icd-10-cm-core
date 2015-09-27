@@ -86,18 +86,19 @@ class Core
    * @param  integer value
    * @return Map
    */
-  _filter(key, value) {
+    _filter(key, value) {
     this.conditions[key] = value;
     let icds = this.defaultICD.get('data');
-    _.each(this.conditions, (condition) => {
+    let i = 0;
+    _.each(this.conditions, (condition, keyCondition) => {
       if (condition !== undefined) {
-        icds = icds.filter(icd => parseInt(icd[key]) === parseInt(value));
+        icds = icds.filter((icd) => {
+          return parseInt(icd[keyCondition]) === parseInt(condition)
+        });
       }
     });
     return icds;
   }
-
-
 
   /**
    * Concat all data
