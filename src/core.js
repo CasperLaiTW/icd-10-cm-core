@@ -15,7 +15,7 @@ class Core
       pedestrian: undefined,
       pedestrianDetail: undefined,
       perpetrator: undefined,
-      accitdentType: undefined,
+      accidentType: undefined,
       medical: undefined,
     }
     this.conditions = _.assign({}, this.defaultCondition);
@@ -32,7 +32,7 @@ class Core
       'pedestrian',
       'pedestrianDetail',
       'perpetrator',
-      'accitdentType',
+      'accidentType',
       'medical',
     ];
     let icd = Map();
@@ -57,7 +57,7 @@ class Core
           break;
         case 'pedestrianDetail':
         case 'perpetrator':
-        case 'accitdentType':
+        case 'accidentType':
         case 'medical':
         case 'pedestrian':
           _.each(icds, (value, key) => {
@@ -110,7 +110,7 @@ class Core
       pedestrian: this.defaultICD.get('pedestrian').get(data.pedestrian).name,
       pedestrianDetail: this.defaultICD.get('pedestrianDetail').get(data.pedestrianDetail).name,
       perpetrator: this.defaultICD.get('perpetrator').get(data.perpetrator).name,
-      accitdentType: this.defaultICD.get('accitdentType').get(data.accitdentType).name,
+      accidentType: this.defaultICD.get('accidentType').get(data.accidentType).name,
       medical: this.defaultICD.get('medical').get(data.medical).name,
     };
   }
@@ -146,8 +146,8 @@ class Core
    * Set accitdent type condition
    * @param integer value
    */
-  setAccitdentType(value) {
-    this.ICD = this._filter('accitdentType', value);
+  setAccidentType(value) {
+    this.ICD = this._filter('accidentType', value);
     return this;
   }
 
