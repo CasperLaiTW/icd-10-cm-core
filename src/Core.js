@@ -10,7 +10,9 @@ class Core
    * @return void
    */
   constructor() {
-    this.root = load('root.json');
+    load('root.json').then((json) => {
+      this.root = json;
+    });
   }
 
   /**
@@ -121,9 +123,12 @@ class Core
 
   setAccident(accident) {
     this.accident = accident;
-    this.rows = load(this.root[accident]);
-    this.menus = this.rows.menus;
-    this._initialize();
+    load(this.root[accident])
+    .then((json) => {
+      this.rows = json;
+      this.menus = this.rows.menus;
+      this._initialize();
+    });
     return this;
   }
 
@@ -184,4 +189,5 @@ class Core
 }
 
 const core = new Core();
+
 export default core;
