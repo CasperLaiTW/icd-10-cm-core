@@ -1,16 +1,18 @@
 {
   "name": "icd-10-cm-core",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "ICD-10-cm filter core",
   "main": "src/Core.js",
   "scripts": {
-    "start": "./node_modules/.bin/babel-node index.js",
+    "clean": "rimraf dist",
+    "build:webpack": "NODE_ENV=production webpack -p",
+    "build": "npm run clean && npm run build:webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Casper Lai",
   "license": "MIT",
   "dependencies": {
-    "icd-10-cm-parser": "^0.1.0",
+    "icd-10-cm-parser": "^0.2.0",
     "immutable": "^3.7.5",
     "lodash": "^3.10.1"
   },
@@ -19,6 +21,7 @@
     "babel-core": "^5.8.25",
     "babel-loader": "^5.3.2",
     "file-loader": "^0.8.4",
+    "rimraf": "^2.4.3",
     "webpack": "^1.12.2"
   }
 }
