@@ -1,11 +1,11 @@
 {
   "name": "icd-10-cm-core",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "ICD-10-cm filter core",
   "main": "src/Core.js",
   "scripts": {
     "clean": "rimraf dist",
-    "build:webpack": "NODE_ENV=production webpack -p",
+    "build:webpack": "webpack -p",
     "build": "npm run clean && npm run build:webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
