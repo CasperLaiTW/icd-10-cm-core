@@ -1,6 +1,6 @@
-import icdJson from 'icd-10-cm-parser';
 import { Map } from 'immutable';
 import _ from 'lodash';
+import { load } from './autoload';
 
 class Core
 {
@@ -10,36 +10,53 @@ class Core
    * @return void
    */
   constructor() {
-    this.defaultICD = this._initializeICD();
-    this.defaultCondition = {
-      pedestrian: undefined,
-      pedestrianDetail: undefined,
-      perpetrator: undefined,
-      accidentType: undefined,
-      medical: undefined,
-    }
-    this.conditions = _.assign({}, this.defaultCondition);
+    this.root = load('root.json');
+  }
+
+  /**
+   * Initialize when user select root accident
+   * @return void
+   */
+  _initialize() {
+    this._initializeICD();
+    this._initializeCondition();
+    this._initializeFunctions();
     this._load();
   }
 
   /**
+   * Initialize dynamic function
+   * @return void
+   */
+  _initializeFunctions() {
+    _.each(this.menus, (value, key) => {
+      const func = 'set' + _.capitalize(key);
+      Core.prototype[func] = (value) => {
+        this._filter(key, value);
+      }
+    });
+  }
+
+  /**
+   * Initialize conditions
+   * @return void
+   */
+  _initializeCondition() {
+    this.defaultCondition = _.keys(this.menus).map(value => {value: undefined});
+  }
+
+
+  /**
    * Initialize ICD-10 property
-   * @return Map
+   * @return void
    */
   _initializeICD() {
-    const icdKey = [
-      'data',
-      'pedestrian',
-      'pedestrianDetail',
-      'perpetrator',
-      'accidentType',
-      'medical',
-    ];
+    const icdKey = ['data'].concat(_.keys(this.menus));
     let icd = Map();
     _.each(icdKey, (value) => {
       icd = icd.set(value, Map());
     })
-    return icd;
+    this.defaultICD = icd;
   }
 
   /**
@@ -47,19 +64,16 @@ class Core
    * @return void
    */
   _load() {
-    _.each(icdJson, (icds, key) => {
+    _.each(this.rows, (icds, key) => {
       let data = Map();
+
       switch (key) {
         case 'data':
           _.each(icds, (value) => {
             data = data.set(value.code, value);
           });
           break;
-        case 'pedestrianDetail':
-        case 'perpetrator':
-        case 'accidentType':
-        case 'medical':
-        case 'pedestrian':
+        default:
           _.each(icds, (value, key) => {
             let tmp = {name: key === 'undefined' ? '' : key, enabled: true};
             data = data.set(value, tmp);
@@ -69,7 +83,7 @@ class Core
       this.defaultICD = this.defaultICD.set(key, data);
     });
     this._clone();
-    this.menus = this.defaultICD.filterNot((value, key) => key === 'data');
+    // this.menus = this.defaultICD.filterNot((value, key) => key === 'data');
   }
 
   /**
@@ -84,11 +98,11 @@ class Core
    * Filter ICD-10 data
    * @param  string key
    * @param  integer value
-   * @return Map
+   * @return void
    */
   _filter(key, value) {
     this.conditions[key] = value;
-    return this.ICD.filter(icd => parseInt(icd[key]) === parseInt(value));
+    this.ICD = this.ICD.filter(icd => parseInt(icd[key]) === parseInt(value));
   }
 
   /**
@@ -97,59 +111,19 @@ class Core
    * @return object
    */
   _concatAll(data) {
+    const _concat = _.map(this.menus, (value, key) => ({[key]: this.defaultICD.get(key).get(data[key]).name}));
     return {
       code: data.code,
       content: data.content,
-      pedestrian: this.defaultICD.get('pedestrian').get(data.pedestrian).name,
-      pedestrianDetail: this.defaultICD.get('pedestrianDetail').get(data.pedestrianDetail).name,
-      perpetrator: this.defaultICD.get('perpetrator').get(data.perpetrator).name,
-      accidentType: this.defaultICD.get('accidentType').get(data.accidentType).name,
-      medical: this.defaultICD.get('medical').get(data.medical).name,
+      ..._concat
     };
   }
 
-  /**
-   * Set pedestrian condition
-   * @param integer value
-   */
-  setPedestrian(value) {
-    this.ICD = this._filter('pedestrian', value);
-    return this;
-  }
-
-  /**
-   * Set pedestrian detail condition
-   * @param integer value
-   */
-  setPedestrianDetail(value) {
-    this.ICD = this._filter('pedestrianDetail', value);
-    return this;
-  }
-
-  /**
-   * Set perpetrator condition
-   * @param integer value
-   */
-  setPerpetrator(value) {
-    this.ICD = this._filter('perpetrator', value);
-    return this;
-  }
-
-  /**
-   * Set accitdent type condition
-   * @param integer value
-   */
-  setAccidentType(value) {
-    this.ICD = this._filter('accidentType', value);
-    return this;
-  }
-
-  /**
-   * Set medical condition
-   * @param integer value
-   */
-  setMedical(value) {
-    this.ICD = this._filter('medical', value);
+  setAccident(accident) {
+    this.accident = accident;
+    this.rows = load(this.root[accident]);
+    this.menus = this.rows.menus;
+    this._initialize();
     return this;
   }
 
