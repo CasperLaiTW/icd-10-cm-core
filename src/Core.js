@@ -17,10 +17,17 @@ class Core
    * @return void
    */
   _initialize() {
-    this._initializeICD();
-    this._initializeCondition();
-    this._initializeFunctions();
-    this._load();
+    return new Promise((resolve, reject) => {
+      Promise.all([
+        this._initializeICD(),
+        this._initializeCondition(),
+        this._initializeFunctions(),
+        this._load()
+      ])
+      .then(() => {
+        resolve();
+      });
+    });
   }
 
   /**
@@ -28,11 +35,14 @@ class Core
    * @return void
    */
   _initializeFunctions() {
-    _.each(this.menus, (value, key) => {
-      const func = 'set' + _.capitalize(key);
-      Core.prototype[func] = (value) => {
-        this._filter(key, value);
-      }
+    return new Promise((resolve, reject) => {
+      _.each(this.menus, (value, key) => {
+        const func = 'set' + _.capitalize(key);
+        Core.prototype[func] = (value) => {
+          this._filter(key, value);
+        }
+      });
+      resolve();
     });
   }
 
@@ -41,7 +51,10 @@ class Core
    * @return void
    */
   _initializeCondition() {
-    this.defaultCondition = _.keys(this.menus).map(value => {value: undefined});
+    return new Promise((resolve, reject) => {
+      this.defaultCondition = _.keys(this.menus).map(value => {value: undefined});
+      resolve();
+    });
   }
 
 
@@ -50,12 +63,15 @@ class Core
    * @return void
    */
   _initializeICD() {
-    const icdKey = ['data'].concat(_.keys(this.menus));
-    let icd = Map();
-    _.each(icdKey, (value) => {
-      icd = icd.set(value, Map());
-    })
-    this.defaultICD = icd;
+    return new Promise((resolve, reject) => {
+      const icdKey = ['data'].concat(_.keys(this.menus));
+      let icd = Map();
+      _.each(icdKey, (value) => {
+        icd = icd.set(value, Map());
+      })
+      this.defaultICD = icd;
+      resolve();
+    });
   }
 
   /**
@@ -63,26 +79,28 @@ class Core
    * @return void
    */
   _load() {
-    _.each(this.rows, (icds, key) => {
-      let data = Map();
+    return new Promise((resolve, reject) => {
+      _.each(this.rows, (icds, key) => {
+        let data = Map();
 
-      switch (key) {
-        case 'data':
-          _.each(icds, (value) => {
-            data = data.set(value.code, value);
-          });
-          break;
-        default:
-          _.each(icds, (value, key) => {
-            let tmp = {name: key === 'undefined' ? '' : key, enabled: true};
-            data = data.set(value, tmp);
-          });
-          break;
-      }
-      this.defaultICD = this.defaultICD.set(key, data);
+        switch (key) {
+          case 'data':
+            _.each(icds, (value) => {
+              data = data.set(value.code, value);
+            });
+            break;
+          default:
+            _.each(icds, (value, key) => {
+              let tmp = {name: key === 'undefined' ? '' : key, enabled: true};
+              data = data.set(value, tmp);
+            });
+            break;
+        }
+        this.defaultICD = this.defaultICD.set(key, data);
+      });
+      this._clone();
+      resolve();
     });
-    this._clone();
-    // this.menus = this.defaultICD.filterNot((value, key) => key === 'data');
   }
 
   /**
@@ -120,13 +138,17 @@ class Core
 
   setAccident(accident) {
     this.accident = accident;
-    load(this.root[accident])
-    .then((json) => {
-      this.rows = json;
-      this.menus = this.rows.menus;
-      this._initialize();
+    return new Promise((resolve, reject) => {
+      load(this.root[accident])
+      .then((json) => {
+        this.rows = json;
+        this.menus = this.rows.menus;
+        this._initialize()
+        .then(() => {
+          resolve();
+        })
+      });
     });
-    return this;
   }
 
   /**
@@ -167,7 +189,7 @@ class Core
    * @return Map
    */
   getConditionState() {
-    const keys = this.menus.keySeq().toArray();
+    const keys = _.keys(this.menus);
     let menus = this.menus;
     _.each(keys, (value) => {
       const enabled = _.uniq(_.pluck(this.ICD.toObject(), value));
