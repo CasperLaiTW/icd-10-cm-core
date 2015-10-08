@@ -10,9 +10,6 @@ class Core
    * @return void
    */
   constructor() {
-    load('root.json').then((json) => {
-      this.root = json;
-    });
   }
 
   /**
@@ -185,6 +182,19 @@ class Core
       menus = menus.set(value, menu);
     });
     return menus;
+  }
+
+  /**
+   * Get root async
+   * @return {Promise}
+   */
+  getRoot() {
+    return new Promise((resolve, reject) => {
+      load('root.json').then((json) => {
+        this.root = json;
+        resolve(json);
+      });
+    });
   }
 }
 
