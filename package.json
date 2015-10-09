@@ -1,6 +1,6 @@
 {
   "name": "icd-10-cm-core",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "ICD-10-cm filter core",
   "main": "src/Core.js",
   "scripts": {

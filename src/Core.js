@@ -36,7 +36,7 @@ class Core
    */
   _initializeFunctions() {
     return new Promise((resolve, reject) => {
-      _.each(this.menus, (value, key) => {
+      _.each(this.menusList, (value, key) => {
         const func = 'set' + _.capitalize(key);
         Core.prototype[func] = (value) => {
           this._filter(key, value);
@@ -52,7 +52,10 @@ class Core
    */
   _initializeCondition() {
     return new Promise((resolve, reject) => {
-      this.defaultCondition = _.keys(this.menus).map(value => {value: undefined});
+      this.defaultCondition = {};
+      _.each(_.keys(this.menusList), (value) => {
+        _.assign(this.defaultCondition, {[value]: undefined});
+      });
       resolve();
     });
   }
@@ -64,7 +67,7 @@ class Core
    */
   _initializeICD() {
     return new Promise((resolve, reject) => {
-      const icdKey = ['data'].concat(_.keys(this.menus));
+      const icdKey = ['data'].concat(_.keys(this.menusList));
       let icd = Map();
       _.each(icdKey, (value) => {
         icd = icd.set(value, Map());
@@ -98,7 +101,8 @@ class Core
         }
         this.defaultICD = this.defaultICD.set(key, data);
       });
-      this._clone();
+      this.menus = this.defaultICD.filterNot((value, key) => key === 'data');
+      this.reset();
       resolve();
     });
   }
@@ -128,21 +132,32 @@ class Core
    * @return object
    */
   _concatAll(data) {
-    const _concat = _.map(this.menus, (value, key) => ({[key]: this.defaultICD.get(key).get(data[key]).name}));
-    return {
+    let _concat = {};
+    _.each(this.menus.toObject(), (value, key) => {
+      let name = '';
+      if (data[key] !== undefined) {
+        value = this.defaultICD.get(key).get(data[key].toString()).name
+      }
+      _.assign(_concat, {[key]: value});
+    });
+
+    return _.assign({
       code: data.code,
       content: data.content,
-      ..._concat
-    };
+    }, _concat);
   }
 
+  /**
+   * Set accident
+   * @param {string} accident
+   */
   setAccident(accident) {
     this.accident = accident;
     return new Promise((resolve, reject) => {
       load(this.root[accident])
       .then((json) => {
         this.rows = json;
-        this.menus = this.rows.menus;
+        this.menusList = this.rows.menus;
         this._initialize()
         .then(() => {
           resolve();
@@ -180,7 +195,7 @@ class Core
       if (value === undefined) {
         return;
       }
-      this.ICD = this._filter(key, value);
+      this._filter(key, value);
     });
   }
 
@@ -189,10 +204,11 @@ class Core
    * @return Map
    */
   getConditionState() {
-    const keys = _.keys(this.menus);
+    const keys = this.menus.keySeq().toArray();
     let menus = this.menus;
+    const icd = this.ICD.toObject();
     _.each(keys, (value) => {
-      const enabled = _.uniq(_.pluck(this.ICD.toObject(), value));
+      const enabled = _.uniq(_.pluck(icd, value));
       let menu = menus.get(value);
       menu.forEach((item, key) => {
         if (_.includes(enabled, key)) {
